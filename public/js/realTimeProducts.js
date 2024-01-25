@@ -5,6 +5,7 @@ let productsArray = [];
 document.addEventListener("DOMContentLoaded", () => {
   if (window.location.pathname.endsWith("/realtimeproducts")) {
     socket.emit("getProducts");
+    console.log("Cliente conectado al servidor")
 
     socket.on("all-products", (products) => {
       productsArray = products;
@@ -46,6 +47,83 @@ const renderProducts = (products) => {
 };
 
 
+// Assuming you have Bootstrap and jQuery included in your project
+
+function showForm() {
+  // Create the modal HTML dynamically
+  const modalHTML = `
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+          <form onsubmit="return addProduct()">
+          <div class="form-group">
+            <label for="title">Título:</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+       
+          <div class="form-group">
+            <label for="description">Descripción:</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+          </div>
+       
+          <div class="form-group">
+            <label for="price">Precio:</label>
+            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+          </div>
+       
+          <div class="form-group">
+            <label for="thumbnail">URL de la Imagen (Thumbnail):</label>
+            <input type="url" class="form-control" id="thumbnail" name="thumbnail" >
+          </div>
+       
+          <div class="form-group">
+            <label for="code">Código:</label>
+            <input type="text" class="form-control" id="code" name="code" required>
+          </div>
+       
+          <div class="form-group">
+            <label for="stock">Stock:</label>
+            <input type="number" class="form-control" id="stock" name="stock" required>
+          </div>
+       
+          <div class="form-group">
+            <label for="status">Estado:</label>
+            <select class="form-control" id="status" name="status" required>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </div>
+       
+          <div class="form-group">
+            <label for="category">Categoría:</label>
+            <input type="text" class="form-control" id="category" name="category" required>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Agregar Producto</button>
+          </div>
+          
+        </form> 
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Append the modal HTML to the body
+  const modalWrapper = document.createElement('div');
+  modalWrapper.innerHTML = modalHTML;
+  document.body.appendChild(modalWrapper);
+
+  // Show the modal using jQuery
+  $('#addProductModal').modal('show');
+}
 
 const addProduct = () => {
   const product = {
@@ -63,6 +141,16 @@ const addProduct = () => {
     text: "Se agrego el producto correctamente!",
     icon: "success", 
     showConfirmButton: true,
+  }).then(() => {
+    document.getElementById('title').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('thumbnail').value = '';
+    document.getElementById('code').value = '';
+    document.getElementById('stock').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('category').value = '';
+    $('#addProductModal').modal('hide');
   })
   return false;
 }
