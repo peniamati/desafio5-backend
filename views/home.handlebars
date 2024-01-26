@@ -6,6 +6,10 @@
   <title>Home</title>
 </head>
 <body>
+  <div class="container mt-5">
+  <div class="col-md-6">
+    <a href="/realtimeproducts" class="btn btn-primary">Ir a Productos</a>
+  </div>
   <h1>Todos los productos</h1>
   <div class="my-12 flex justify-center items-center">
         <div class="flex  grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -14,7 +18,7 @@
                 <div class="flex flex-col justify-center items-center">
                     <img src={{this.thumbnail}} alt="" width="250" height="250" />
                 </div>
-                <h3 class="font-medium text-xl text-white text-center">
+                <h3 class="font-medium text-xl text-center">
                     {{this.title}}
                 </h3>
                 <h2 class="text-gray-200 font-semibold text-3xl mt-2 text-center">
@@ -33,6 +37,7 @@
             </div>
             {{/each}}
         </div>
+    </div>
     </div>
 
 </body>
