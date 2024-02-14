@@ -19,11 +19,11 @@ const renderProducts = (products) => {
 
   products.forEach((product) => {
     const productCard = document.createElement("div");
-    productCard.id = product.id;
+    productCard.id = product._id;
     productCard.className = "col-md-3 mb-3"; // Utiliza col-md-3 para limitar el ancho
 
     // Verifica si la propiedad thumbnail es null y asigna una imagen por defecto
-    const thumbnailSrc = product.thumbnail ? product.thumbnail : "https://i.ibb.co/txH0LxV/default-image-icon-vector-missing-260nw-2086941550.webp";
+    const thumbnailSrc = product.thumbnail ? product.thumbnail : "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png";
 
     productCard.innerHTML = `
       <div class="card">
@@ -37,7 +37,7 @@ const renderProducts = (products) => {
           </h2>
           <div class="w-full h-[1px] bg-gray-500 my-4"></div>
           <button class="btn btn-dark w-full mb-2">Comprar</button>
-          <button class="btn btn-danger w-full" onclick="deleteProduct('${product.id}')">Eliminar</button>
+          <button class="btn btn-danger w-full" onclick="deleteProduct('${product._id}')">Eliminar</button>
         </div>
       </div>
     `;
@@ -67,32 +67,26 @@ function showForm() {
             <label for="title">Título:</label>
             <input type="text" class="form-control" id="title" name="title" required>
           </div>
-       
           <div class="form-group">
             <label for="description">Descripción:</label>
             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
           </div>
-       
           <div class="form-group">
             <label for="price">Precio:</label>
             <input type="number" class="form-control" id="price" name="price" step="0.01" required>
           </div>
-       
           <div class="form-group">
             <label for="thumbnail">URL de la Imagen (Thumbnail):</label>
             <input type="url" class="form-control" id="thumbnail" name="thumbnail" >
           </div>
-       
           <div class="form-group">
             <label for="code">Código:</label>
             <input type="text" class="form-control" id="code" name="code" required>
           </div>
-       
           <div class="form-group">
             <label for="stock">Stock:</label>
             <input type="number" class="form-control" id="stock" name="stock" required>
           </div>
-       
           <div class="form-group">
             <label for="status">Estado:</label>
             <select class="form-control" id="status" name="status" required>
@@ -100,7 +94,6 @@ function showForm() {
               <option value="inactive">Inactivo</option>
             </select>
           </div>
-       
           <div class="form-group">
             <label for="category">Categoría:</label>
             <input type="text" class="form-control" id="category" name="category" required>
