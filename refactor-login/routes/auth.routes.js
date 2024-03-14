@@ -78,9 +78,18 @@ route.get("/logout", async (req, res) => {
 route.get('/auth/github',
   passport.authenticate('github'));
 
-route.get('/auth/callbackGithub',
+route.get('/callbackGithub',
   passport.authenticate('github', { failureRedirect: '/' }),
   (req, res) => {
+    req.session.user = {
+      username: req.user.username,
+      rol:
+        req.user.username === "adminCoder@coder.com" &&
+        req.user.password === "adminCod3r123"
+          ? "admin"
+          : "usuario",
+    }
+
     res.redirect('/api/products');
   });
 
