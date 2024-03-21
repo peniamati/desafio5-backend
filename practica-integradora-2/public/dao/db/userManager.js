@@ -65,10 +65,7 @@ class UserManager {
       const exist = await this.findUser(userData.email);
       if (!exist) {
         // Realiza la solicitud para crear un nuevo carrito y espera la respuesta
-        const cartResponse = await fetch("http://localhost:8080/api/carts/createCart", {
-          method: "POST",
-        });
-        const cartData = await cartResponse.json(); // Extrae el ID del carrito de la respuesta JSON
+        const cartData = await cartManager.addCart(); // Extrae el ID del carrito de la respuesta JSON
         const cartId = cartData._id;
 
          // Crea un nuevo usuario con el ID del carrito obtenido
@@ -105,6 +102,16 @@ class UserManager {
     } catch (err) {
       console.error(err);
       return false;
+    }
+  }
+
+  async findUserByGithubId(githubId) {
+    try {
+      const user = await User.findOne({ githubId });
+      return user;
+    } catch (error) {
+      console.error("Error al buscar usuario por ID de GitHub:", error);
+      throw error;
     }
   }
 }

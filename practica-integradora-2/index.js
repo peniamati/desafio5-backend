@@ -1,4 +1,8 @@
 const express = require("express");
+const passport = require('passport');
+const bodyParser = require("body-parser");
+const { initializePassport } = require("./public/dao/config/passport.config.js");
+const cookieParser = require("cookie-parser");
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const handlebars = require("express-handlebars");
@@ -19,9 +23,9 @@ const cartsRoute = require("./public/dao/routes/carts.routes.js");
 // const cartManager = new CartManager();
 const messagesRoute = require("./public/dao/routes/chat.routes.js");
 const Chat = require("./public/dao/db/models/chat.model.js");
-const viewsRoutes = require("./public/dao/routes/views.routes.js");
-const passport = require("./public/dao/config/passport.config.js");
+// const passport = require("./public/dao/config/passport.config.js"); // Elimina esta línea
 const authRoutes = require("./public/dao/routes/auth.routes.js");
+const viewsRoutes = require("./public/dao/routes/views.routes.js");
 
 
 app.use(session({
@@ -33,9 +37,12 @@ app.use(session({
   saveUninitialized: false
 }));
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cookieParser());
+
 // Inicializar Passport y usarlo en tus rutas
 app.use(passport.initialize());
-app.use(passport.session());
 app.use('/api/sessions', authRoutes);
 
 // esto es desde la base de datos

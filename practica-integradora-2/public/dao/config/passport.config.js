@@ -2,10 +2,13 @@ const passport = require('passport');
 const GitHubStrategy = require("passport-github2").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-const LocalStrategy = require('passport-local').Strategy; // Importa la estrategia local
-const userManager = require("../db/userManager.js");
-const UserManager = new userManager();
-const { SECRET_KEY } = require("../utils/generateToken.js");
+const LocalStrategy = require('passport-local').Strategy;
+const User = require("../db/models/user.model");
+const Cart = require("../db/models/cart.model"); // Importa el modelo de carrito
+const UserManager = require("../db/userManager.js");
+const userManager = new UserManager();
+require('dotenv').config();
+const { tokenGenerator, SECRET_KEY } = require("../utils/generateToken.js");
 const bcrypt = require("bcrypt");
 
 const cookieExtractor = function (req) {
@@ -17,7 +20,6 @@ const cookieExtractor = function (req) {
 };
 
 const initializePassport = () => {
-  // Configurar la estrategia JWT
   passport.use(
     "jwt",
     new JwtStrategy(
@@ -27,8 +29,7 @@ const initializePassport = () => {
       },
       async (jwt_payload, done) => {
         try {
-          // Aquí puedes verificar el jwt_payload y encontrar el usuario en la base de datos
-          const user = await UserManager.getUserById(jwt_payload.userId);
+          const user = await userManager.getUserById(jwt_payload.id);
           if (!user) {
             return done(null, false);
           }
@@ -40,39 +41,59 @@ const initializePassport = () => {
     )
   );
 
-  // Configurar la estrategia GitHub
   passport.use(
     "login_github",
-    new GitHubStrategy({
-      clientID: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: 'http://localhost:8080/api/sessions/login_github/callback',
-    }, async (accessToken, refreshToken, profile, done) => {
-      try {
-        const response = await UserManager.loginWithGitHub(profile._json);
-        return response
-          ? done(null, response)
-          : done(null, false, {
-              message: "Usuario no encontrado",
+    new GitHubStrategy(
+      {
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: 'http://localhost:8080/api/sessions/login_github/callback',
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          // Verificar si el usuario ya existe en la base de datos
+          let user = await userManager.findUserByGithubId(profile.id);
+          if (!user) {
+            // Si el usuario no existe, crear uno nuevo
+            const newUser = new User({
+              email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '', // Verifica si hay correos electrónicos en el perfil
+              name: profile.displayName || '', // Usa el nombre de pantalla como nombre si está disponible
+              lastname: profile.name && profile.name.familyName ? profile.name.familyName : '', // Verifica si hay un apellido en el perfil
+              age: profile.age || '', // Verifica si hay una edad en el perfil
+              role: "github user",
             });
-      } catch (err) {
-        return done(err);
+            
+            // Crear un carrito para el nuevo usuario
+            const newCart = await Cart.create({ products: [] });
+            newUser.cart = { cart: newCart._id }; // Asigna el ID del nuevo carrito al usuario
+            
+            user = await newUser.save();
+          }
+          
+          // Generar token para el usuario
+          const token = tokenGenerator(user);
+          
+          // Devolver el usuario y el token
+          return done(null, { user, token });
+        } catch (err) {
+          return done(err);
+        }
       }
-    })
+    )
   );
+  
 
-  // Configurar la estrategia local
   passport.use(
     "login_local",
     new LocalStrategy(
-      { usernameField: 'email' }, // Define el campo del nombre de usuario
-      async (username, password, done) => {
+      { usernameField: 'email' },
+      async (email, password, done) => {
         try {
-          const user = await UserManager.findUser(username); // Busca al usuario por su nombre de usuario
+          const user = await userManager.findUser(email);
           if (!user) {
-            return done(null, false, { message: 'Nombre de usuario incorrecto' });
+            return done(null, false, { message: 'Correo electrónico incorrecto' });
           }
-          const match = await bcrypt.compare(password, user.password); // Compara la contraseña
+          const match = await bcrypt.compare(password, user.password);
           if (!match) {
             return done(null, false, { message: 'Contraseña incorrecta' });
           }
@@ -85,6 +106,16 @@ const initializePassport = () => {
   );
 };
 
-initializePassport(); // Llama a la función para inicializar Passport
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
 
-module.exports = passport; // Exporta Passport directamente
+passport.deserializeUser((id, done) => {
+  User.findById(id, (err, user) => {
+    done(err, user);
+  });
+});
+
+initializePassport();
+
+module.exports = { initializePassport };

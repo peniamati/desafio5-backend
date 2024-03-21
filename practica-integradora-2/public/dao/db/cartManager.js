@@ -1,4 +1,4 @@
-const Cart = require("./models/cartManager.model");
+const Cart = require("./models/cart.model");
 
 class CartManager {
   constructor() {
@@ -14,9 +14,9 @@ class CartManager {
       return [];
     }
   }
-  async addCart(newCart) {
+  async addCart() {
     try {
-      const cart = new Cart(newCart);
+      const cart = await Cart.create({ products: [] });
       await cart.save();
       return cart;
     } catch (err) {
