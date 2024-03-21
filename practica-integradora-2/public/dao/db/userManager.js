@@ -60,28 +60,31 @@ class UserManager {
     }
   }
 
-  async loginWithGitHub(userData) {
+  async loginWithGitHub(profile) {
     try {
-      const exist = await this.findUser(userData.email);
+      const id = profile.id || '';
+      const exist = await this.findUserById(id);
+      
       if (!exist) {
-        // Realiza la solicitud para crear un nuevo carrito y espera la respuesta
-        const cartData = await cartManager.addCart(); // Extrae el ID del carrito de la respuesta JSON
+        const cartData = await cartManager.addCart();
         const cartId = cartData._id;
-
-         // Crea un nuevo usuario con el ID del carrito obtenido
-         const newUser = new User({
-          email: userData.email,
+  
+        const newUser = new User({
+          email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '',
           password: createHash("githubuserpassword"),
-          name: userData.name,
-          lastname: userData.name, // Revisar si esto es correcto
-          age: userData.age,
+          name: profile.displayName || '',
+          lastname: profile.name && profile.name.familyName ? profile.name.familyName : '',
+          age: profile.age || '',
           cart: cartId,
+          githubId: profile.id,
         });
-
-        if (userData.email === "admin@coder.com"){
-          newUser.role = "admin"
+  
+        if (newUser.email === "admin@coder.com") {
+          newUser.role = "admin";
+        } else {
+          newUser.role = "github-user";
         }
-       
+        
         await newUser.save();
         delete newUser.password;
         return newUser;
@@ -94,6 +97,7 @@ class UserManager {
       return false;
     }
   }
+  
 
   async findUser(email) {
     try {
@@ -105,13 +109,13 @@ class UserManager {
     }
   }
 
-  async findUserByGithubId(githubId) {
+  async findUserById(id) {
     try {
-      const user = await User.findOne({ githubId });
-      return user;
-    } catch (error) {
-      console.error("Error al buscar usuario por ID de GitHub:", error);
-      throw error;
+      const userFound = await User.findOne({ githubId: id });
+      return userFound ? userFound : false;
+    } catch (err) {
+      console.error(err);
+      return false;
     }
   }
 }

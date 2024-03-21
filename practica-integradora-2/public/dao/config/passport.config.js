@@ -52,24 +52,7 @@ const initializePassport = () => {
       async (accessToken, refreshToken, profile, done) => {
         try {
           // Verificar si el usuario ya existe en la base de datos
-          let user = await userManager.findUserByGithubId(profile.id);
-          if (!user) {
-            // Si el usuario no existe, crear uno nuevo
-            const newUser = new User({
-              email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '', // Verifica si hay correos electrónicos en el perfil
-              name: profile.displayName || '', // Usa el nombre de pantalla como nombre si está disponible
-              lastname: profile.name && profile.name.familyName ? profile.name.familyName : '', // Verifica si hay un apellido en el perfil
-              age: profile.age || '', // Verifica si hay una edad en el perfil
-              role: "github user",
-            });
-            
-            // Crear un carrito para el nuevo usuario
-            const newCart = await Cart.create({ products: [] });
-            newUser.cart = { cart: newCart._id }; // Asigna el ID del nuevo carrito al usuario
-            
-            user = await newUser.save();
-          }
-          
+          let user = await userManager.loginWithGitHub(profile); 
           // Generar token para el usuario
           const token = tokenGenerator(user);
           
