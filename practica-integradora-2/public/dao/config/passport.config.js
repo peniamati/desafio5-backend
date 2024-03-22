@@ -48,6 +48,7 @@ const initializePassport = () => {
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         callbackURL: 'http://localhost:8080/api/sessions/login_github/callback',
+        scope: ["user:email"],
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

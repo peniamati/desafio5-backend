@@ -2,6 +2,7 @@ const User = require("./models/user.model");
 const { createHash } = require("../utils/bcrypts");
 const CartManager = require("./cartManager");
 const cartManager = new CartManager();
+const mongoose = require('mongoose');
 
 class UserManager {
   constructor() {
@@ -10,7 +11,7 @@ class UserManager {
 
   async addUser(userData) {
     try {
-      const exist = await this.findUser(userData.email);
+      const exist = await this.findUserByEmail(userData.email);
       if(!exist) {
         const cart = await cartManager.addCart();
         userData.cart = cart._id
@@ -44,10 +45,22 @@ class UserManager {
 
   async getUserById(id) {
     try {
+      if (!id) {
+        // Si el ID no está definido, retornar null
+        return null;
+      }
+  
+      // Verificar si el ID es válido antes de buscar en la base de datos
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        // Si el ID no es válido, retornar null
+        return null;
+      }
+  
       let user = await User.findById(id);
       return user;
     } catch (err) {
       console.error(err);
+      return null; // Retornar null en caso de error
     }
   }
 
@@ -62,15 +75,16 @@ class UserManager {
 
   async loginWithGitHub(profile) {
     try {
-      const id = profile.id || '';
-      const exist = await this.findUserById(id);
+      const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '';
+      const exist = await this.findUserByEmail(email);
       
       if (!exist) {
+        // Si el usuario no existe, crea un nuevo usuario
         const cartData = await cartManager.addCart();
         const cartId = cartData._id;
   
         const newUser = new User({
-          email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '',
+          email: email,
           password: createHash("githubuserpassword"),
           name: profile.displayName || '',
           lastname: profile.name && profile.name.familyName ? profile.name.familyName : '',
@@ -84,14 +98,17 @@ class UserManager {
         } else {
           newUser.role = "github-user";
         }
-        
+  
         await newUser.save();
         delete newUser.password;
+        
         return newUser;
       } else {
+        // Si el usuario ya existe, devuelve el usuario existente
         delete exist.password;
         return exist;
       }
+  
     } catch (err) {
       console.error(err);
       return false;
@@ -99,19 +116,9 @@ class UserManager {
   }
   
 
-  async findUser(email) {
+  async findUserByEmail(email) {
     try {
       const userFound = await User.findOne({ email: email });
-      return userFound ? userFound : false;
-    } catch (err) {
-      console.error(err);
-      return false;
-    }
-  }
-
-  async findUserById(id) {
-    try {
-      const userFound = await User.findOne({ githubId: id });
       return userFound ? userFound : false;
     } catch (err) {
       console.error(err);

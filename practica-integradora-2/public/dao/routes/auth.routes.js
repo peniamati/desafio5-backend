@@ -27,7 +27,7 @@ route.post("/register", async (req, res) => {
 route.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await userManager.findUser(email);
+    const user = await userManager.findUserByEmail(email);
     if (!user) {
       return res.status(401).send("Correo electrónico incorrecto");
     }
