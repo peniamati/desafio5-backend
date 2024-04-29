@@ -27,7 +27,7 @@ class UserManager {
       userData.cart = cartId;
   
       // Si el usuario es admin, establece su rol
-      if (userData.email === "admin@coder.com") {
+      if (userData.email === "adminCoder@coder.com") {
         userData.role = "admin";
       }
   

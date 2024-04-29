@@ -9,6 +9,11 @@
   <h1>Productos</h1>
   <h2>Bienvenido usuario: {{user.email}} Rol: {{user.role}}</h2>
 
+  {{#if isAdmin}}
+    <div class="mb-3">
+      <a href="/api/products/manager" class="btn btn-primary">Gestionar Productos</a>
+    </div>
+  {{/if}}
 
   <div class="mb-3">
     <a href="/api/carts/{{cartId}}" class="btn btn-primary" id="cart-link">Ir a Carrito</a>
@@ -69,6 +74,5 @@
         });
     });
 });
-
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

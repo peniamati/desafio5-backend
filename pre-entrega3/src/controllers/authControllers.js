@@ -42,7 +42,7 @@ async function login(req, res) {
       const token = tokenGenerator(user);
       req.session.user = user; // Agregar el usuario a la sesión
       res.cookie("cookieToken", token, { httpOnly: true });
-      return res.redirect("/admin/dashboard"); // Ejemplo de redirección para el administrador
+      return res.redirect("/api/products"); // Ejemplo de redirección para el administrador
     }
 
     // Si no es el administrador, continuar con la autenticación normal
