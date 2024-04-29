@@ -79,6 +79,7 @@ function loginGithubCallback(req, res) {
 }
 
 async function logout(req, res) {
+  req.session.destroy(); // Destruye la sesión del usuario
   res.clearCookie("cookieToken").redirect("/login");
 }
 

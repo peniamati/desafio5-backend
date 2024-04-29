@@ -11,6 +11,12 @@
 
 <body>
   <div class="container">
+    <div class="d-flex justify-content-end mb-3">
+      <form action="/api/sessions/logout" method="post">
+        <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+      </form>
+    </div>
+    <a href="/api/products" class="btn btn-primary">Ir a Productos</a>
     <h1 class="my-4">Product Manager</h1>
 
     <!-- Formulario para agregar producto -->
@@ -193,24 +199,24 @@
           }
 
 
-            // Change the edit button to 'Save' and bind the update event
-            $(`#product-${productId} .edit-product`).text('Save').addClass('save-product').removeClass('edit-product');
-            // Hide the delete button temporarily
-            $(`#product-${productId} .delete-product`).text('Cancel').addClass('cancel-product').removeClass('delete-product');
+          // Change the edit button to 'Save' and bind the update event
+          $(`#product-${productId} .edit-product`).text('Save').addClass('save-product').removeClass('edit-product');
+          // Hide the delete button temporarily
+          $(`#product-${productId} .delete-product`).text('Cancel').addClass('cancel-product').removeClass('delete-product');
 
-            // Bind the save event
-            $(`#product-${productId} .save-product`).on('click', function () {
-              // Save the product
-              saveProduct(productId);
-            });
+          // Bind the save event
+          $(`#product-${productId} .save-product`).on('click', function () {
+            // Save the product
+            saveProduct(productId);
+          });
 
-            // Bind the cancel event
-            $(`#product-${productId} .cancel-product`).on('click', function () {
-              // Cancel the edit
-              cancelEdit(productId);
-            });
+          // Bind the cancel event
+          $(`#product-${productId} .cancel-product`).on('click', function () {
+            // Cancel the edit
+            cancelEdit(productId);
+          });
 
-          })
+        })
 
         function cancelEdit(productId) {
           $(`#product-${productId} .edit-product`).text('Edit').addClass('edit-product').removeClass('save-product');
