@@ -185,10 +185,10 @@ async function createProduct(req, res) {
     } = req.body;
 
     // Si no se especifica un owner en la solicitud, establecerlo como "admin" por defecto
-    const ownerId = owner ? owner : "admin";
+    const ownerId = owner ? new ObjectId(owner) : "admin";
 
-    // Verificar si el usuario es "premium" antes de crear el producto
-    if (req.session.user && req.session.user.role === 'premium') {
+    // Verificar si el usuario es "premium" o "admin" antes de crear el producto
+    if (req.session.user && req.session.user.role === 'premium' || req.session.user.role === 'admin') {
       await productManager.addProduct({
         title,
         description,
@@ -203,7 +203,7 @@ async function createProduct(req, res) {
 
       res.redirect("/api/products/manager");
     } else {
-      res.status(403).json({ error: 'Acceso denegado. Solo los usuarios premium pueden crear productos.' });
+      res.status(403).json({ error: 'Acceso denegado. Solo los usuarios premium o admin pueden crear productos.' });
     }
   } catch (error) {
     logger.error(`Error al crear un producto: ${error}`);
@@ -224,6 +224,7 @@ async function updateProduct(req, res) {
       return res.status(400).send({ error: 'ID del producto no válido' });
     }
 
+
     // Buscar el producto
     const productResult = await productManager.getProductById(productId);
     const product = productResult.data;
@@ -234,8 +235,7 @@ async function updateProduct(req, res) {
     }
 
     // Verificar los permisos de modificación
-    if ((user.role === 'admin') || (user.role === 'premium' && product.owner === userId)) {
-     
+    if (user && (user.role === 'admin') || (user.role === 'premium' && product.owner != 'admin' && product.owner.equals(userId))) {
       // Si el usuario tiene permisos, actualizar el producto
       const updatedProduct = await productManager.updateProductById(productId, newData);
 
@@ -248,8 +248,8 @@ async function updateProduct(req, res) {
         return res.status(404).send({ error: 'Producto no encontrado' });
       }
     } else {
-      // Devolver un mensaje indicando que el usuario no tiene permisos
-      return res.status(403).send({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
+      // Si el usuario no tiene permisos, mostrar un SweetAlert indicando el error
+      return res.status(403).send({ error: 'El usuario no tiene permisos para modificar este producto' });
     }
   } catch (error) {
     // Manejar errores
@@ -263,6 +263,7 @@ async function updateProduct(req, res) {
 async function deleteProduct(req, res) {
   const productId = req.params.id;
   const user = req.session.user;
+  const userId = new ObjectId(user._id);
 
   try {
     // Buscar el producto
@@ -272,8 +273,9 @@ async function deleteProduct(req, res) {
     if (!product) {
       return res.status(404).send({ error: errorDictionary.PRODUCT_NOT_FOUND });
     }
+
     // Verificar los permisos de eliminación
-    if (user && (user.role === 'admin' || (user.role === 'premium' && product.owner === user._id))) {
+    if (user && (user.role === 'admin') || (user.role === 'premium' && product.owner != 'admin' && product.owner.equals(userId))) {
       // Si el usuario tiene permisos, eliminar el producto
       const deleted = await productManager.deleteProductById(productId);
 
@@ -284,11 +286,7 @@ async function deleteProduct(req, res) {
       }
     } else {
       // Si el usuario no tiene permisos, mostrar un SweetAlert indicando el error
-      Swal.fire({
-        icon: 'error',
-        title: 'Acceso denegado',
-        text: 'No tienes los permisos necesarios para realizar esta acción.',
-      });
+      return res.status(403).send({ error: 'El usuario no tiene permisos para eliminar este producto' });
 
     }
   } catch (error) {

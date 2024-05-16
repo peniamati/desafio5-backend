@@ -46,9 +46,9 @@ async function addProductToCart(req, res) {
     await cartManager.addProdToCart(cId, pId);
     logger.info(`Producto ${pId} agregado al carrito ${cId}`);
     res.status(201).send({ msg: `Producto ${pId} agregado al carrito ${cId}` });
-  } catch (err) {
-    logger.error('Error al agregar producto al carrito:', err);
-    res.status(500).send({ msg: errorDictionary.INTERNAL_SERVER_ERROR });
+  } catch (error) {
+    logger.error('Error al agregar producto al carrito:', error);
+    res.status(500).send({ msg: errorDictionary.SERVER_PRODUCT_ERROR });
   }
 }
 
@@ -57,6 +57,14 @@ async function updateProductQuantity(req, res) {
     const cid = req.params.cid;
     const pid = req.params.pid;
     const quantity = req.body.quantity;
+    const userRole = req.user.role;
+
+    const product = await Product.findById(pid);
+    
+    if (userRole === 'premium' && product.owner != 'admin') {
+      logger.error('No tiene permisos para agregar este producto');
+      return res.status(403).send({ msg: 'No tiene permisos para agregar este producto' });
+    }
 
     let response = await cartManager.updateProductQuantity(cid, pid, quantity);
 

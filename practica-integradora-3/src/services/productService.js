@@ -1,6 +1,7 @@
 const Products = require('../models/productManager.model');
 const { v4: uuidv4 } = require('uuid');
 const errorDictionary = require('../middleware/errorDictionary');
+const { json } = require('express');
 
 class ProductManager {
   constructor() {
@@ -164,27 +165,25 @@ class ProductManager {
     }
   }
 
-  async updateProductById(req, res) {
-    const { id } = req.params;
-    const update = req.body;
+  async updateProductById(id, update) {
     try {
       const updatedProduct = await Products.findByIdAndUpdate(id, update, { new: true });
       if (!updatedProduct) {
-        return res.status(400).json({ error: errorDictionary.PRODUCT_NOT_EXISTS });
+        return { success: false, message: errorDictionary.PRODUCT_NOT_EXISTS };
       }
-      res.status(200).json({ updatedProduct });
+      return { success: true, updatedProduct };
     } catch (error) {
-      res.status(500).json({ error: 'Something went wrong' });
+      return { success: false, error: 'Something went wrong' };
     }
   }
 
-  async deleteProductById(req, res) {
-    const { id } = req.params;
-    try {
+  async deleteProductById(id) {
+    try{
       const result = await Products.deleteOne({ _id: id });
-      res.status(200).json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: errorDictionary.GENERIC_ERROR });
+      return { success: true, deletedCount: result.deletedCount };
+    }
+    catch(error){
+      return { success: false, error: 'Something went wrong' };
     }
   }
 }

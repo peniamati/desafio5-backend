@@ -1,5 +1,7 @@
 const transporter = require('../config/email.config');
 const User = require('../models/user.model');
+const UserManager = require('../services/userService');
+const userManager = new UserManager();
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -120,10 +122,25 @@ async function toggleUserRole(req, res) {
     }
 }
 
+async function getAllUserIdAndEmails(req, res) {
+    try {
+        const users = await userManager.getAllUserIdAndEmails();
+        if (!users) {
+            return res.status(404).json({ message: 'No se encontraron usuarios' });
+        }
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+}
+
+
 module.exports = {
     sendResetPasswordEmail,
     resetPassword,
     renderResetPassword,
     renderNewPasswordForm,
     toggleUserRole,
+    getAllUserIdAndEmails
 };
