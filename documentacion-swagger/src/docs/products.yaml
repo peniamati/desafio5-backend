@@ -1,0 +1,184 @@
+paths:
+  /api/swagger/allProducts:
+    get:
+      summary: Obtiene todos los productos disponibles en la aplicación
+      tags: [Productos]
+      responses:
+        '200':
+          description: Se obtuvieron todos los productos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          description: Error en la solicitud
+        '500':
+          description: Error interno en el servidor, no se pudo obtener los productos
+
+  /api/swagger/prodById/{productId}:
+    get:
+      summary: Obtiene un producto por su ID disponible en la aplicación (solo para administradores y usuarios premium)
+      tags: [Productos]
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+          required: true
+          description: ID del producto
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno en el servidor
+
+  /api/swagger/manager:
+    get:
+      summary: Acceso a la página de gestión de productos (solo para administradores y usuarios premium)
+      tags: [Productos]
+      description: |
+        Esta ruta permite renderizar los productos de la página para usuarios premium y administradores,
+        ya que tiene un botón para administrar los productos, editarlos y borrarlos pero se encuentra aplicado únicamente en la página de gestión.
+
+  /api/swagger/createProd:
+    post:
+      summary: Crea un nuevo producto (solo para administradores y usuarios premium)
+      tags: [Productos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProduct'
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Error en la solicitud
+        '500':
+          description: Error interno en el servidor al crear el producto
+
+  /api/swagger/updateProd/{id}:
+    put:
+      summary: Actualiza un producto por su ID (solo para administradores y usuarios premium)
+      tags: [Productos]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProduct'
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno en el servidor al actualizar el producto
+
+  /api/swagger/deleteProd/{id}:
+    delete:
+      summary: Elimina un producto por su ID (solo para administradores y usuarios premium)
+      tags: [Productos]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del producto
+      responses:
+        '200':
+          description: Producto eliminado
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno en el servidor al eliminar el producto
+
+  /api/swagger/mockingproducts:
+    get:
+      summary: Genera productos simulados
+      tags: [Productos]
+      responses:
+        '200':
+          description: Productos simulados generados
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "6630189271033ddbeac14620"
+        title:
+          type: string
+          example: "Alfajor Milka"
+        description:
+          type: string
+          example: "Dulce de leche y chocolate"
+        price:
+          type: number
+          example: 2000
+        code:
+          type: string
+          example: "AM123"
+        stock:
+          type: number
+          example: 19
+        status:
+          type: boolean
+          example: true
+        category:
+          type: string
+          example: "Alfajores"
+        thumbnail:
+          type: string
+          example: ""
+        owner:
+          type: object or string
+          example: "admin"
+      required:
+        - title
+        - description
+        - price
+        - code
+        - stock
+        - status
+        - category
+        - thumbnail
+        - owner
+      example:
+        _id: "6630189271033ddbeac14620"
+        title: "Alfajor Milka"
+        description: "Dulce de leche y chocolate"
+        price: 2000
+        code: "AM123"
+        stock: 19
+        status: true
+        category: "Alfajores"
+        thumbnail: ""
+        owner: "admin"
