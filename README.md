@@ -46,6 +46,14 @@ Para iniciar el entorno de producción, utiliza el siguiente comando:
 npm start
 ```
 
+### Test
+
+Para iniciar los tests, utiliza el siguiente comando:
+
+```
+npm run test
+```
+
 ## Documentación API
 La documentación de la API está disponible en Swagger. Se han creado rutas específicas para trabajar con productos y carritos sin necesidad de autenticación, lo que facilita las pruebas.
 
@@ -57,3 +65,87 @@ http://localhost:8080/apidocs
 
 ## Uso de Swagger
 Para acceder a las rutas de Swagger sin autenticación, simplemente navega a la URL proporcionada arriba. La interfaz de Swagger te permitirá probar los diferentes endpoints de la API sin necesidad de ser admin o user.
+
+## Rutas disponibles
+### Auth
+```
+// routes/auth.routes.js
+POST /api/sessions/register
+POST /api/sessions/login
+GET /api/sessions/login_github
+GET /api/sessions/login_github/callback
+POST /api/sessions/logout
+GET /api/sessions/current
+```
+
+### Carts
+```
+// routes/carts.routes.js
+GET /api/carts/allCarts
+GET /api/carts/:cid
+POST /api/carts/addProdToCart/:cId/:pId
+POST /api/carts/createCart
+DELETE /api/carts/:cid/products/:pid
+DELETE /api/carts/:cid
+POST /api/carts/:cid/products
+PUT /api/carts/:cid
+PUT /api/carts/:cid/products/:pid
+POST /api/carts/:cid/purchase
+```
+
+### Chat
+```
+// routes/chat.routes.js
+GET /api/chat/allMessages
+POST /api/chat/createMessage
+GET /api/chat/
+```
+
+### Logger
+```
+// routes/logger.routes.js
+GET /api/loggerTest
+```
+
+### Main
+```
+// routes/main.routes.js
+GET /api/sessions/
+GET /api/sessions/login
+GET /api/sessions/register
+GET /api/sessions/profile
+```
+
+### Products
+```
+// routes/products.routes.js
+GET /api/products/
+GET /api/products/allProducts
+GET /api/products/prodById/:productId
+GET /api/products/manager/
+POST /api/products/createProd
+PUT /api/products/updateProd/:id
+DELETE /api/products/deleteProd/:id
+GET /api/products/mockingproducts
+```
+
+### Real Time Products
+```
+// routes/realTimeProducts.routes.js
+GET /api/realTimeProducts/
+GET /api/realTimeProducts/realtimeproducts
+```
+
+### Users
+```
+// routes/user.routes.js
+GET /api/users/reset-password
+POST /api/users/reset-password-email
+GET /api/users/reset-password/:token
+POST /api/users/reset-password/:token
+PUT /api/users/premium/:uid
+GET /api/users/all-users-emails
+POST /api/users/:uid/documents
+```
+
+
